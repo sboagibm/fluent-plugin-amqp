@@ -22,11 +22,10 @@ module Fluent
     def initialize
       require 'bunny'
       require "json" if @payload_format == "json"
-      
+
       super
     end
 
-    
     def configure(conf)
       super
       @conf = conf
@@ -37,18 +36,18 @@ module Fluent
                          :pass => @pass, :user => @user, :ssl => @ssl,
                          :verify_ssl => @verify_ssl, :heartbeat => @heartbeat)
     end
-    
+
     def start
       super
       @thread = Thread.new(&method(:run))
     end
-    
+
     def shutdown
       @bunny.stop
       @thread.join
       super
     end
-    
+
     def run
       @bunny.start
       q = @bunny.queue(@queue, :passive => @passive, :durable => @durable,
@@ -62,7 +61,7 @@ module Fluent
     private
     def parse_payload(msg)
       ret = { payload: msg[:payload] }
-      
+
       begin
         case @payload_format
         when "json"
