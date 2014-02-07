@@ -22,11 +22,10 @@ module Fluent
     def initialize
       require 'bunny'
       require "json" if @payload_format == "json"
-      
+
       super
     end
 
-    
     def configure(conf)
       super
       @conf = conf
@@ -37,23 +36,23 @@ module Fluent
                          :pass => @pass, :user => @user, :ssl => @ssl,
                          :verify_ssl => @verify_ssl, :heartbeat => @heartbeat)
     end
-    
+
     def start
       super
       @thread = Thread.new(&method(:run))
     end
-    
+
     def shutdown
       @bunny.stop
       @thread.join
       super
     end
-    
+
     def run
       @bunny.start
       q = @bunny.queue(@queue, :passive => @passive, :durable => @durable,
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
-      q.subscribe do |msg|
+      q.subscribe do |_, _, msg|
         payload = parse_payload(msg)
         Engine.emit(@tag, Time.new.to_i, payload)
       end
@@ -61,16 +60,16 @@ module Fluent
 
     private
     def parse_payload(msg)
-      ret = { payload: msg[:payload] }
-      
+      ret = { 'payload' => msg }
+
       begin
         case @payload_format
         when "json"
-          ret = JSON.parse(msg[:payload])
+          ret = JSON.parse(msg)
         end
       rescue => e
         # should raises a error to ovserver?
-        $log.error "parse payload error: #{e}, payload: #{msg[:payload]}"
+        $log.error "parse payload error: #{e}, payload: #{msg}"
       end
 
       ret
