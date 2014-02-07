@@ -26,22 +26,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = "1.8.25"
   s.summary = "AMQP input/output plugin or fluentd"
 
-  if s.respond_to? :specification_version then
-    s.specification_version = 3
-
-    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<fluentd>, ["~> 0.10.0"])
-      s.add_runtime_dependency(%q<bunny>, ["~> 1.1.0"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.3.0"])
-    else
-      s.add_dependency(%q<fluentd>, ["~> 0.10.0"])
-      s.add_dependency(%q<bunny>, ["~> 1.1.0"])
-      s.add_dependency(%q<bundler>, ["~> 1.3.0"])
-    end
-  else
-    s.add_dependency(%q<fluentd>, ["~> 0.10.0"])
-    s.add_dependency(%q<bunny>, ["~> 1.1.0"])
-    s.add_dependency(%q<bundler>, ["~> 1.3.0"])
-  end
+  s.add_runtime_dependency(%q<fluentd>, ["~> 0.10.0"])
+  s.add_runtime_dependency(%q<bunny>, ["~> 1.1.0"])
 end
-
