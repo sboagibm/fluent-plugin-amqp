@@ -51,6 +51,7 @@ module Fluent
 
     def write(chunk)
       chunk.msgpack_each do |data|
+        data = JSON.dump( data ) unless data.is_a?( String )
         @exch.publish(data, :key => @key, :persistent => @persistent)
       end
     end
