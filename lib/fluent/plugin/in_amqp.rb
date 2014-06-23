@@ -26,13 +26,19 @@ module Fluent
 
     def initialize
       require 'bunny'
-      require "json" if @payload_format == "json"
-
       super
     end
 
     def configure(conf)
+      conf['format'] ||= conf['payload_format'] # legacy
+
       super
+
+      parser = TextParser.new
+      if parser.configure(conf, false)
+        @parser = parser
+      end
+
       @conf = conf
       unless @host && @queue
         raise ConfigError, "'host' and 'queue' must be all specified."
@@ -65,19 +71,20 @@ module Fluent
 
     private
     def parse_payload(msg)
-      ret = { 'payload' => msg }
-
-      begin
-        case @payload_format
-        when "json"
-          ret = JSON.parse(msg)
+      if @parser
+        parsed = nil
+        @parser.parse msg do |_, payload|
+          if payload.nil?
+            log.warn "failed to parse #{msg}"
+            parsed = { "payload" => msg }
+          else
+            parsed = payload
+          end
         end
-      rescue => e
-        # should raises a error to ovserver?
-        $log.error "parse payload error: #{e}, payload: #{msg}"
+        parsed
+      else
+        { "payload" => msg }
       end
-
-      ret
     end
 
     def parse_tag( delivery, meta )
