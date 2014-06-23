@@ -17,7 +17,7 @@ module Fluent
     config_param :exclusive, :bool, :default => false
     config_param :auto_delete, :bool, :default => false
     config_param :passive, :bool, :default => false
-    config_param :payload_format, :string, :default => "json" # legacy
+    config_param :payload_format, :string, :default => "json"
 
     def initialize
       require 'bunny'
