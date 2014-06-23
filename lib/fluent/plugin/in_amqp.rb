@@ -1,3 +1,5 @@
+require 'time'
+
 module Fluent
   class AMQPInput < Input
     Fluent::Plugin.register_input('amqp', self)
@@ -18,6 +20,9 @@ module Fluent
     config_param :auto_delete, :bool, :default => false
     config_param :passive, :bool, :default => false
     config_param :payload_format, :string, :default => "json"
+    config_param :tag_key, :bool, :default => false
+    config_param :tag_header, :string, :default => nil
+    config_param :time_header, :string, :default => nil
 
     def initialize
       require 'bunny'
@@ -52,9 +57,9 @@ module Fluent
       @bunny.start
       q = @bunny.queue(@queue, :passive => @passive, :durable => @durable,
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
-      q.subscribe do |_, _, msg|
+      q.subscribe do |delivery, meta, msg|
         payload = parse_payload(msg)
-        Engine.emit(@tag, Time.new.to_i, payload)
+        Engine.emit(parse_tag(delivery, meta), parse_time(meta), payload)
       end
     end # AMQPInput#run
 
@@ -73,6 +78,24 @@ module Fluent
       end
 
       ret
+    end
+
+    def parse_tag( delivery, meta )
+      if @tag_key && delivery.routing_key != ''
+        delivery.routing_key
+      elsif @tag_header && meta[:headers][@tag_header]
+        meta[:headers][@tag_header]
+      else
+        @tag
+      end
+    end
+
+    def parse_time( meta )
+      if @time_header && meta[:headers][@time_header]
+        Time.parse( meta[:headers][@time_header] ).to_i
+      else
+        Time.new.to_i
+      end
     end
   end # class AMQPInput
 
