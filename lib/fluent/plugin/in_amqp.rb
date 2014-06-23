@@ -71,14 +71,14 @@ module Fluent
         @parser.parse msg do |_, payload|
           if payload.nil?
             log.warn "failed to parse #{msg}"
-            parsed = { "payload" => msg }
+            parsed = { "message" => msg }
           else
             parsed = payload
           end
         end
         parsed
       else
-        { "payload" => msg }
+        { "message" => msg }
       end
     end
   end # class AMQPInput
