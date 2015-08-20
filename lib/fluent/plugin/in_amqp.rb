@@ -60,7 +60,7 @@ module Fluent
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
       q.subscribe do |_, _, msg|
         payload = parse_payload(msg)
-        Engine.emit(@tag, Time.new.to_i, payload)
+        router.emit(@tag, Time.new.to_i, payload)
       end
     end # AMQPInput#run
 
