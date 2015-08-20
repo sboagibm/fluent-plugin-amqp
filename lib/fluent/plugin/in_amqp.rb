@@ -6,7 +6,7 @@ module Fluent
 
     config_param :host, :string, :default => nil
     config_param :user, :string, :default => "guest"
-    config_param :pass, :string, :default => "guest"
+    config_param :pass, :string, :default => "guest", :secret => true
     config_param :vhost, :string, :default => "/"
     config_param :port, :integer, :default => 5672
     config_param :ssl, :bool, :default => false
