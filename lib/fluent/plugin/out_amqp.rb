@@ -1,3 +1,4 @@
+require 'json'
 module Fluent
   class AMQPOutput < BufferedOutput
     Plugin.register_output("amqp", self)
@@ -16,6 +17,9 @@ module Fluent
     config_param :auto_delete, :bool, :default => false
     config_param :key, :string, :default => nil
     config_param :persistent, :bool, :default => false
+    config_param :tag_key, :bool, :default => false
+    config_param :tag_header, :string, :default => nil
+    config_param :time_header, :string, :default => nil
 
     def initialize
       super
@@ -25,8 +29,11 @@ module Fluent
     def configure(conf)
       super
       @conf = conf
-      unless @host && @exchange && @key
-        raise ConfigError, "'host', 'exchange' and 'key' must be all specified."
+      unless @host && @exchange
+        raise ConfigError, "'host' and 'exchange' must be all specified."
+      end
+      unless @key || @tag_key
+        raise ConfigError, "Either 'key' or 'tag_key' must be set."
       end
       @bunny = Bunny.new(:host => @host, :port => @port, :vhost => @vhost,
                          :pass => @pass, :user => @user, :ssl => @ssl, :verify_ssl => @verify_ssl)
@@ -46,12 +53,28 @@ module Fluent
     end
 
     def format(tag, time, record)
-      record.to_msgpack
+      [tag, time, record].to_msgpack
     end
 
     def write(chunk)
-      chunk.msgpack_each do |data|
-        @exch.publish(data, :key => @key, :persistent => @persistent)
+      chunk.msgpack_each do |(tag, time, data)|
+        data = JSON.dump( data ) unless data.is_a?( String )
+        @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+      end
+    end
+
+    def routing_key( tag )
+      if @tag_key
+        tag
+      else
+        @key
+      end
+    end
+
+    def headers( tag, time )
+      {}.tap do |h|
+        h[@tag_header] = tag if @tag_header
+        h[@time_header] = Time.at(time).utc.to_s if @time_header
       end
     end
 
