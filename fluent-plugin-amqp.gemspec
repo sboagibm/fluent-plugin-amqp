@@ -31,4 +31,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<shoulda>)
   s.add_development_dependency(%q<rake>)
   s.add_development_dependency(%q<minitest>, ["< 5.0.0"])
+  s.add_development_dependency(%q<test-unit>, [">= 3.1.0"])
 end
