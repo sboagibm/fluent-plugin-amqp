@@ -7,6 +7,21 @@ Description goes here.
 
 ### in
 
+```
+<source>
+  type amqp
+  host amqp.example.com
+  port 5672
+  vhost /
+  user guest
+  pass guest
+  queue logs
+  format json
+</source>
+```
+
+#### in params
+
 |param|type|default|secret|
 |----|----|----|---|
 |:tag|:string|"hunter.amqp"| |
@@ -29,6 +44,21 @@ Description goes here.
 |:time_header|:string|nil| |
 
 ### out
+
+```
+<match **.**>
+  type amqp
+  key my_routing_key
+  exchange amq.direct
+  host amqp.example.com
+  port 5672
+  vhost /
+  user guest
+  pass guest
+</match>
+```
+
+#### out params
 
 |param|type|default|secret|
 |----|----|----|----|
