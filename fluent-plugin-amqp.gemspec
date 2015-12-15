@@ -13,8 +13,7 @@ Gem::Specification.new do |s|
   s.description = "AMQP input/output plugin for fluentd"
   s.email = "sawanoboriyu@higanworks.com"
   s.extra_rdoc_files = [
-    "LICENSE.txt",
-    "README.rdoc"
+    "LICENSE.txt"
   ]
   s.files = [
     "lib/fluent/plugin/in_amqp.rb",
