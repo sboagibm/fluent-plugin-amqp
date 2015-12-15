@@ -13,8 +13,7 @@ Gem::Specification.new do |s|
   s.description = "AMQP input/output plugin for fluentd"
   s.email = "sawanoboriyu@higanworks.com"
   s.extra_rdoc_files = [
-    "LICENSE.txt",
-    "README.rdoc"
+    "LICENSE.txt"
   ]
   s.files = [
     "lib/fluent/plugin/in_amqp.rb",
@@ -27,7 +26,8 @@ Gem::Specification.new do |s|
   s.summary = "AMQP input/output plugin or fluentd"
 
   s.add_runtime_dependency(%q<fluentd>, ["~> 0.10.0"])
-  s.add_runtime_dependency(%q<bunny>, ["~> 1.1.0"])
+  s.add_runtime_dependency(%q<bunny>, ["~> 1.1.0", "< 2.0"])
+  s.add_runtime_dependency(%q<amq-protocol>, ["< 2.0"])
   s.add_development_dependency(%q<shoulda>)
   s.add_development_dependency(%q<rake>)
   s.add_development_dependency(%q<minitest>, ["< 5.0.0"])
