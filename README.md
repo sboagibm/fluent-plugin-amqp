@@ -69,6 +69,7 @@ Description goes here.
 |:port|:integer|5672| |
 |:ssl|:bool|false| |
 |:verify_ssl|:bool|false| |
+|:heartbeat|:integer|60| |
 |:exchange|:string|""| |
 |:exchange_type|:string|"direct"| |
 |:passive|:bool|false| |
