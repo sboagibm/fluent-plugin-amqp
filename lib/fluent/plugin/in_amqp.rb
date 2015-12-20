@@ -18,7 +18,7 @@ module Fluent
     config_param :port, :integer, :default => 5672
     config_param :ssl, :bool, :default => false
     config_param :verify_ssl, :bool, :default => false
-    config_param :heartbeat, :integer, :default => 0
+    config_param :heartbeat, :integer, :default => 60
     config_param :queue, :string, :default => nil
     config_param :durable, :bool, :default => false
     config_param :exclusive, :bool, :default => false
@@ -66,7 +66,8 @@ module Fluent
 
     def run
       @bunny.start
-      q = @bunny.queue(@queue, :passive => @passive, :durable => @durable,
+      @channel = @bunny.create_channel
+      q = @channel.queue(@queue, :passive => @passive, :durable => @durable,
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
       q.subscribe do |delivery, meta, msg|
         payload = parse_payload(msg)
