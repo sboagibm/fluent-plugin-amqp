@@ -42,7 +42,8 @@ module Fluent
     def start
       super
       @bunny.start
-      @exch = @bunny.exchange(@exchange, :type => @exchange_type.intern,
+      @channel = @bunny.create_channel
+      @exch = @channel.exchange(@exchange, :type => @exchange_type.intern,
                               :passive => @passive, :durable => @durable,
                               :auto_delete => @auto_delete)
     end
