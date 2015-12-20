@@ -10,6 +10,7 @@ module Fluent
     config_param :port, :integer, :default => 5672
     config_param :ssl, :bool, :default => false
     config_param :verify_ssl, :bool, :default => false
+    config_param :heartbeat, :integer, :default => 60
     config_param :exchange, :string, :default => ""
     config_param :exchange_type, :string, :default => "direct"
     config_param :passive, :bool, :default => false
@@ -36,7 +37,8 @@ module Fluent
         raise ConfigError, "Either 'key' or 'tag_key' must be set."
       end
       @bunny = Bunny.new(:host => @host, :port => @port, :vhost => @vhost,
-                         :pass => @pass, :user => @user, :ssl => @ssl, :verify_ssl => @verify_ssl)
+                         :pass => @pass, :user => @user, :ssl => @ssl, :verify_ssl => @verify_ssl,
+                         :heartbeat => @heartbeat)
     end
 
     def start
