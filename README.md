@@ -32,7 +32,7 @@ Description goes here.
 |:port|:integer|5672| |
 |:ssl|:bool|false| |
 |:verify_ssl|:bool|false| |
-|:heartbeat|:integer|0| |
+|:heartbeat|:integer|60| |
 |:queue|:string|nil| |
 |:durable|:bool|false| |
 |:exclusive|:bool|false| |
