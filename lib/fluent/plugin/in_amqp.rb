@@ -28,6 +28,11 @@ module Fluent
     config_param :tag_key, :bool, :default => false
     config_param :tag_header, :string, :default => nil
     config_param :time_header, :string, :default => nil
+    config_param :tls, :bool, :default => false
+    config_param :tls_cert, :string, :default => nil
+    config_param :tls_key, :string, :default => nil
+    config_param :tls_ca_certificates, :string, :default => nil
+    config_param :tls_verify_peer, :bool, :default => true
 
     def initialize
       require 'bunny'
@@ -48,9 +53,20 @@ module Fluent
       unless @host && @queue
         raise ConfigError, "'host' and 'queue' must be all specified."
       end
-      @bunny = Bunny.new(:host => @host, :port => @port, :vhost => @vhost,
-                         :pass => @pass, :user => @user, :ssl => @ssl,
-                         :verify_ssl => @verify_ssl, :heartbeat => @heartbeat)
+      if @tls && !(@tls_key && @tls_cert)
+        raise ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
+      end
+      opts = {
+        :host => @host, :port => @port, :vhost => @vhost,
+        :pass => @pass, :user => @user, :ssl => @ssl,
+        :verify_ssl => @verify_ssl, :heartbeat => @heartbeat,
+        :tls                 => @tls,
+        :tls_cert            => @tls_cert,
+        :tls_key             => @tls_key,
+        :verify_peer         => @tls_verify_peer
+      }
+      opts[:tls_ca_certificates] = Array(@tls_ca_certificates.split(' ')) if @tls_ca_certificates
+      @bunny = Bunny.new(opts)
     end
 
     def start
