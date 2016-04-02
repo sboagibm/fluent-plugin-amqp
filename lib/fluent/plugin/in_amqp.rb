@@ -69,7 +69,7 @@ module Fluent
 
     def shutdown
       @connection.stop
-      @connection.join
+      @thread.join
       super
     end
 
