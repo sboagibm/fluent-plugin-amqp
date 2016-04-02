@@ -1,5 +1,8 @@
 require 'json'
 module Fluent
+  ##
+  # AMQPOutput to be used as a Fluent MATCHER, sending messages to a RabbitMQ
+  # messaging broker
   class AMQPOutput < BufferedOutput
     Plugin.register_output("amqp", self)
 

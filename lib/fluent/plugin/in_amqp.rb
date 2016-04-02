@@ -1,6 +1,9 @@
 require 'time'
 
 module Fluent
+  ##
+  # AMQPInput to be used as a Fluent SOURCE, reading messages from a RabbitMQ
+  # message broker
   class AMQPInput < Input
     Fluent::Plugin.register_input('amqp', self)
 
@@ -37,6 +40,10 @@ module Fluent
     config_param :tls_key, :string, :default => nil
     config_param :tls_ca_certificates, :array, :default => nil
     config_param :tls_verify_peer, :bool, :default => true
+    config_param :bind_exchange, :bool, :default => false
+    config_param :exchange, :string, :default => ""
+
+
 
     def initialize
       require 'bunny'
@@ -59,7 +66,6 @@ module Fluent
         raise ConfigError, "'host' and 'queue' must be all specified."
       end
       check_tls_configuration
-
     end
 
     def start
@@ -80,6 +86,9 @@ module Fluent
       @channel = @connection.create_channel
       q = @channel.queue(@queue, :passive => @passive, :durable => @durable,
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
+      if @bind_exchange
+        q.bind(@exchange)
+      end
       q.subscribe do |delivery, meta, msg|
         payload = parse_payload(msg)
         router.emit(parse_tag(delivery, meta), parse_time(meta), payload)
