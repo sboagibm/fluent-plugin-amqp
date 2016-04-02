@@ -1,5 +1,8 @@
 require 'rubygems'
 require 'bundler'
+require 'simplecov'
+SimpleCov.start
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -15,5 +18,5 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 #require 'fluent-plugin-amqp'
 
-class Test::Unit::TestCase
-end
+
+require 'bunny-mock'

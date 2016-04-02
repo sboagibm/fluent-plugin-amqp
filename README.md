@@ -42,6 +42,14 @@ Description goes here.
 |:tag_key|:bool|false| | |
 |:tag_header|:string|nil| |
 |:time_header|:string|nil| |
+|:tls|:bool|false| |
+|:tls_cert|:string|nil| |
+|:tls_key|:string|nil| |
+|:tls_ca_certificates|:array|nil| |
+|:tls_verify_peer|:bool|true| |
+
+
+
 
 ### out
 
@@ -80,6 +88,43 @@ Description goes here.
 |:tag_key|:bool|false| |
 |:tag_header|:string|nil| |
 |:time_header|:string|nil| |
+|:tls|:bool|false| |
+|:tls_cert|:string|nil| |
+|:tls_key|:string|nil| |
+|:tls_ca_certificates|:array|nil| |
+|:tls_verify_peer|:bool|true| |
+
+### Enable TLS Authentication
+
+The example below shows how you can configure TLS authentication using signed encryption keys
+which will be validated by your appropriately configured RabbitMQ installation.
+
+For more information on setting up TLS encryption, see the [Bunny TLS documentation](http://rubybunny.info/articles/tls.html)
+
+Note: The 'source' configuration accepts the same arguments.
+
+```
+<match **.**>
+  type amqp
+  key my_routing_key
+  exchange amq.direct
+  host amqp.example.com
+  port 5671              # Note that your port may change for TLS auth
+  vhost /
+  user guest
+  pass guest
+
+  tls true
+  tls_key "/etc/fluent/ssl/client.key.pem"
+  tls_cert "/etc/fluent/ssl/client.crt.pem"
+  tls_ca_certificates ["/etc/fluent/ssl/server.cacrt.pem", "/another/ca/cert.file"]
+  tls_verify_peer true
+
+</match>
+```
+
+## Docker Container
+
 
 ## Contributing to fluent-plugin-amqp
 
@@ -96,4 +141,3 @@ Description goes here.
 Copyright (c) 2011 Hiromi Ishii. See LICENSE.txt for
 Copyright (c) 2013- github/giraffi. See LICENSE.txt for
 further details.
-

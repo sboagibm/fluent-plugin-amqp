@@ -3,6 +3,8 @@ module Fluent
   class AMQPOutput < BufferedOutput
     Plugin.register_output("amqp", self)
 
+    attr_accessor :connection
+
     config_param :host, :string, :default => nil
     config_param :user, :string, :default => "guest"
     config_param :pass, :string, :default => "guest", :secret => true
@@ -21,6 +23,11 @@ module Fluent
     config_param :tag_key, :bool, :default => false
     config_param :tag_header, :string, :default => nil
     config_param :time_header, :string, :default => nil
+    config_param :tls, :bool, :default => false
+    config_param :tls_cert, :string, :default => nil
+    config_param :tls_key, :string, :default => nil
+    config_param :tls_ca_certificates, :array, :default => nil
+    config_param :tls_verify_peer, :bool, :default => true
 
     def initialize
       super
@@ -30,21 +37,21 @@ module Fluent
     def configure(conf)
       super
       @conf = conf
-      unless @host && @exchange
-        raise ConfigError, "'host' and 'exchange' must be all specified."
+      unless @host
+        raise ConfigError, "'host' must be specified."
       end
       unless @key || @tag_key
         raise ConfigError, "Either 'key' or 'tag_key' must be set."
       end
-      @bunny = Bunny.new(:host => @host, :port => @port, :vhost => @vhost,
-                         :pass => @pass, :user => @user, :ssl => @ssl, :verify_ssl => @verify_ssl,
-                         :heartbeat => @heartbeat)
+      check_tls_configuration
     end
 
     def start
       super
-      @bunny.start
-      @channel = @bunny.create_channel
+      @connection = Bunny.new(get_connection_options) unless @connection
+
+      @connection.start
+      @channel = @connection.create_channel
       @exch = @channel.exchange(@exchange, :type => @exchange_type.intern,
                               :passive => @passive, :durable => @durable,
                               :auto_delete => @auto_delete)
@@ -52,7 +59,7 @@ module Fluent
 
     def shutdown
       super
-      @bunny.stop
+      @connection.stop
     end
 
     def format(tag, time, record)
@@ -79,6 +86,30 @@ module Fluent
         h[@tag_header] = tag if @tag_header
         h[@time_header] = Time.at(time).utc.to_s if @time_header
       end
+    end
+
+
+    private
+    def check_tls_configuration()
+      if @tls
+        unless @tls_key && @tls_cert
+            raise ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
+        end
+      end
+    end
+
+    def get_connection_options()
+      opts = {
+        :host => @host, :port => @port, :vhost => @vhost,
+        :pass => @pass, :user => @user, :ssl => @ssl,
+        :verify_ssl => @verify_ssl, :heartbeat => @heartbeat,
+        :tls                 => @tls,
+        :tls_cert            => @tls_cert,
+        :tls_key             => @tls_key,
+        :verify_peer         => @tls_verify_peer
+      }
+      opts[:tls_ca_certificates] = @tls_ca_certificates if @tls_ca_certificates
+      return opts
     end
 
   end

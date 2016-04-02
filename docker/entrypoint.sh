@@ -20,7 +20,8 @@ rabbitmqctl set_permissions admin ".*" ".*" ".*"
 # yum install -y openssh-server
 # service sshd start
 
-td-agent -c /fluent-plugin-amqp/test/fixtures/fluentd.conf
+CONFIG=${1:-fluentd.conf}
+td-agent -c /fluent-plugin-amqp/test/fixtures/${CONFIG}
 
 ## To debug
 #/bin/bash

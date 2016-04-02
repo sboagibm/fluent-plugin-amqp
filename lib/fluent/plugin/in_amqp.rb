@@ -9,6 +9,10 @@ module Fluent
       define_method("router") { Engine }
     end
 
+    # Bunny connection handle
+    #   - Allows mocking for test purposes
+    attr_accessor :connection
+
     config_param :tag, :string, :default => "hunter.amqp"
 
     config_param :host, :string, :default => nil
@@ -28,11 +32,17 @@ module Fluent
     config_param :tag_key, :bool, :default => false
     config_param :tag_header, :string, :default => nil
     config_param :time_header, :string, :default => nil
+    config_param :tls, :bool, :default => false
+    config_param :tls_cert, :string, :default => nil
+    config_param :tls_key, :string, :default => nil
+    config_param :tls_ca_certificates, :array, :default => nil
+    config_param :tls_verify_peer, :bool, :default => true
 
     def initialize
       require 'bunny'
       super
     end
+
 
     def configure(conf)
       conf['format'] ||= conf['payload_format'] # legacy
@@ -48,9 +58,8 @@ module Fluent
       unless @host && @queue
         raise ConfigError, "'host' and 'queue' must be all specified."
       end
-      @bunny = Bunny.new(:host => @host, :port => @port, :vhost => @vhost,
-                         :pass => @pass, :user => @user, :ssl => @ssl,
-                         :verify_ssl => @verify_ssl, :heartbeat => @heartbeat)
+      check_tls_configuration
+
     end
 
     def start
@@ -59,14 +68,16 @@ module Fluent
     end
 
     def shutdown
-      @bunny.stop
+      @connection.stop
       @thread.join
       super
     end
 
     def run
-      @bunny.start
-      @channel = @bunny.create_channel
+      # Create a new connection, unless its already been provided to us
+      @connection = Bunny.new get_connection_options unless @connection
+      @connection.start
+      @channel = @connection.create_channel
       q = @channel.queue(@queue, :passive => @passive, :durable => @durable,
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
       q.subscribe do |delivery, meta, msg|
@@ -110,6 +121,29 @@ module Fluent
         Time.new.to_i
       end
     end
+
+    def check_tls_configuration()
+      if @tls
+        unless @tls_key && @tls_cert
+            raise ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
+        end
+      end
+    end
+
+    def get_connection_options()
+      opts = {
+        :host => @host, :port => @port, :vhost => @vhost,
+        :pass => @pass, :user => @user, :ssl => @ssl,
+        :verify_ssl => @verify_ssl, :heartbeat => @heartbeat,
+        :tls                 => @tls,
+        :tls_cert            => @tls_cert,
+        :tls_key             => @tls_key,
+        :verify_peer         => @tls_verify_peer
+      }
+      opts[:tls_ca_certificates] = @tls_ca_certificates if @tls_ca_certificates
+      return opts
+    end
+
   end # class AMQPInput
 
 end # module Fluent
