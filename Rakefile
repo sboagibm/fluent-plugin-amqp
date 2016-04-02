@@ -7,7 +7,9 @@ require 'rake/testtask'
 
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
-  test.test_files = FileList['test/*.rb']
+  test.test_files = Dir["test/**/test_*.rb"].sort
+  test.verbose = false
+  test.warning = false
 end
 
 task :default => [:test]

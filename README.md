@@ -45,7 +45,7 @@ Description goes here.
 |:tls|:bool|false| |
 |:tls_cert|:string|nil| |
 |:tls_key|:string|nil| |
-|:tls_ca_certificates|:string|nil| |
+|:tls_ca_certificates|:array|nil| |
 |:tls_verify_peer|:bool|true| |
 
 
@@ -91,7 +91,7 @@ Description goes here.
 |:tls|:bool|false| |
 |:tls_cert|:string|nil| |
 |:tls_key|:string|nil| |
-|:tls_ca_certificates|:string|nil| |
+|:tls_ca_certificates|:array|nil| |
 |:tls_verify_peer|:bool|true| |
 
 ### Enable TLS Authentication
@@ -117,11 +117,14 @@ Note: The 'source' configuration accepts the same arguments.
   tls true
   tls_key "/etc/fluent/ssl/client.key.pem"
   tls_cert "/etc/fluent/ssl/client.crt.pem"
-  tls_ca_certificates "/etc/fluent/ssl/server.cacrt.pem /another/ca/cert.file"
+  tls_ca_certificates ["/etc/fluent/ssl/server.cacrt.pem", "/another/ca/cert.file"]
   tls_verify_peer true
-  
+
 </match>
 ```
+
+## Docker Container
+
 
 ## Contributing to fluent-plugin-amqp
 
