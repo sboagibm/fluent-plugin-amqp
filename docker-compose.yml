@@ -1,0 +1,43 @@
+version: '2'
+
+
+
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    expose:
+      - 5672
+      - 15672
+    ports:
+      - "15672:15672"
+  fluentsource:
+    build: .
+    image: fluent-amqp
+    environment:
+      FLUENTD_CONF: fluentd-out.conf
+    volumes:
+     - ./test/fixtures/:/etc/fluentd
+    links:
+     - rabbitmq
+    ports:
+     - "20001:20001"
+    restart: always
+    depends_on:
+      - rabbitmq
+
+  fluentmatcher:
+    build: .
+    image: fluent-amqp
+    environment:
+      FLUENTD_CONF: fluentd-in.conf
+    volumes:
+     - ./test/fixtures/:/etc/fluentd
+    links:
+     - rabbitmq
+    restart: always
+    depends_on:
+      - rabbitmq

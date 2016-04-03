@@ -65,6 +65,7 @@ class AMPQInputTest < Test::Unit::TestCase
   sub_test_case 'connection handling' do
 
     test 'queue is created' do
+      omit("Need to replace bunny-mock with proper mocking - it cant cope with q.subscribe and sensible replay/verification")
       plugin = create_driver(CONFIG).instance
       plugin.connection = BunnyMock.new
 

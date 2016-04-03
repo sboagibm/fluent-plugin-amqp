@@ -86,7 +86,9 @@ Note: The following are in addition to the common parameters shown above.
 |:queue|:string|nil| What queue contains the events to read |
 |:exclusive|:bool|false| Should we have exclusive use of the queue? |
 |:payload_format|:string|"json"| Deprecated - Use `format`|
-
+|:bind_exchange|:boolean|false| Should the queue automatically bind to the exchange |
+|:exchange|:string|nil| What exchange should the queue bind to? |
+|:routing_key|:string|nil| What exchange should the queue bind to? |
 
 ### Example
 
@@ -105,14 +107,21 @@ Note: The following are in addition to the common parameters shown above.
 
 ## Matcher - output events from RabbitMQ <a name="conf-matcher"></a>
 
+
+
+
+
+
+### out
+=======
 ### Matcher specific parameters
 
 |param|type|default|description|
 |----|----|----|----|
 |:exchange|:string|""| Name of the exchange to send events to |
 |:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers )|
-|:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
 |:persistent|:bool|false| | Are messages kept on the exchange even if RabbitMQ shuts down |
+|:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
 
 ### Example
 
@@ -208,10 +217,25 @@ Note: The 'source' configuration accepts the same arguments.
 
 ## Docker Container
 
-A docker container has been created to help with testing and trying the
-plugin out.
+A docker container is included in this project to help with testing and debugging.
 
-Checkout the [readme](docker/README.md) for more information.
+You can simply build the docker container's ready for use with the following;
+```
+docker-compose build
+```
+
+Start the cluster of three containers with;
+```
+docker-compose up
+```
+
+And finally, submit test events, one a second, to the built in tcp.socket source
+with;
+
+```
+while [ true ] ; do echo "{ \"test\": \"$(date)\" }" | nc ${DOCKER_IP} 20001; sleep 1; done
+```
+
 
 # Contributing to fluent-plugin-amqp <a name="contributing"></a>
 
