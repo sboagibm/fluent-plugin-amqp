@@ -51,9 +51,17 @@ module Fluent
 
     def start
       super
-      @connection = Bunny.new(get_connection_options) unless @connection
+      begin
+        log.info "Connecting to RabbitMQ..."
+        @connection = Bunny.new(get_connection_options) unless @connection
+        @connection.start
+      rescue Bunny::TCPConnectionFailed => e
+        log.error "Connection to #{@host} failed"
+      rescue Bunny::PossibleAuthenticationFailureError => e
+        log.error "Could not authenticate as #{@user}"
+      end
 
-      @connection.start
+      log.info "Creating new exchange #{@exchange}"
       @channel = @connection.create_channel
       @exch = @channel.exchange(@exchange, :type => @exchange_type.intern,
                               :passive => @passive, :durable => @durable,
@@ -72,6 +80,7 @@ module Fluent
     def write(chunk)
       chunk.msgpack_each do |(tag, time, data)|
         data = JSON.dump( data ) unless data.is_a?( String )
+        log.info "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
         @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
       end
     end
