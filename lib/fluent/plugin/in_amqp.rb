@@ -42,7 +42,7 @@ module Fluent
     config_param :tls_verify_peer, :bool, :default => true
     config_param :bind_exchange, :bool, :default => false
     config_param :exchange, :string, :default => ""
-    config_param :key, :string, :default => "#"                       # The routing key used to bind queue to exchange - # = matches all, * matches section (tag.*.info)
+    config_param :routing_key, :string, :default => "#"                       # The routing key used to bind queue to exchange - # = matches all, * matches section (tag.*.info)
 
 
 
@@ -78,8 +78,8 @@ module Fluent
       q = @channel.queue(@queue, :passive => @passive, :durable => @durable,
                        :exclusive => @exclusive, :auto_delete => @auto_delete)
       if @bind_exchange
-        log.info "Binding #{@queue} to #{@exchange}, :routing_key => #{@key}"
-        q.bind(exchange=@exchange, :routing_key => @key)
+        log.info "Binding #{@queue} to #{@exchange}, :routing_key => #{@routing_key}"
+        q.bind(exchange=@exchange, :routing_key => @routing_key)
       end
 
       q.subscribe do |delivery, meta, msg|

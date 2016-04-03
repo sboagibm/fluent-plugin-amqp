@@ -3,6 +3,7 @@
 ## 0.7.1
 
 * Sources can now automatically bind to exchanges [Issue #16](https://github.com/giraffi/fluent-plugin-amqp/issues/16)
+* Refactored Docker container to use docker-compose and use multiple containers for testing source and matches concurrently
 
 ## 0.7.0
 

@@ -86,7 +86,9 @@ Note: The following are in addition to the common parameters shown above.
 |:queue|:string|nil| What queue contains the events to read |
 |:exclusive|:bool|false| Should we have exclusive use of the queue? |
 |:payload_format|:string|"json"| Deprecated - Use `format`|
-
+|:bind_exchange|:boolean|false| Should the queue automatically bind to the exchange |
+|:exchange|:string|nil| What exchange should the queue bind to? |
+|:routing_key|:string|nil| What exchange should the queue bind to? |
 
 ### Example
 
@@ -118,10 +120,8 @@ Note: The following are in addition to the common parameters shown above.
 |----|----|----|----|
 |:exchange|:string|""| Name of the exchange to send events to |
 |:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers )|
-|:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
 |:persistent|:bool|false| | Are messages kept on the exchange even if RabbitMQ shuts down |
-|:bind_exchange|:boolean|false| Should the queue automatically bind to the exchange |
-|:exchange|:string|nil| What exchange should the queue bind to? |
+|:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
 
 ### Example
 
