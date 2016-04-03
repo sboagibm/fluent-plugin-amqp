@@ -80,7 +80,7 @@ module Fluent
     def write(chunk)
       chunk.msgpack_each do |(tag, time, data)|
         data = JSON.dump( data ) unless data.is_a?( String )
-        log.info "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
+        log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
         @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
       end
     end

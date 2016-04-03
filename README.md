@@ -47,6 +47,9 @@ Description goes here.
 |:tls_key|:string|nil| |
 |:tls_ca_certificates|:array|nil| |
 |:tls_verify_peer|:bool|true| |
+|:bind_exchange|:boolean|false| |
+|:exchange|:string|nil| |
+
 
 
 
@@ -125,6 +128,24 @@ Note: The 'source' configuration accepts the same arguments.
 
 ## Docker Container
 
+A docker container is included in this project to help with testing and debugging.
+
+You can simply build the docker container's ready for use with the following;
+```
+docker-compose build
+```
+
+Start the cluster of three containers with;
+```
+docker-compose up
+```
+
+And finally, submit test events, one a second, to the built in tcp.socket source
+with;
+
+```
+while [ true ] ; do echo "{ \"test\": \"$(date)\" }" | nc ${DOCKER_IP} 20001; sleep 1; done
+```
 
 ## Contributing to fluent-plugin-amqp
 
