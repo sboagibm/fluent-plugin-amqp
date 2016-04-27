@@ -4,6 +4,8 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
 
 # Table of contents
 
+1. [Features](#features)
+    1. [Highly Available Failover](#feat-failover)
 1. [Configuration](#configuration)
     1. [Common parameters](#conf-common)
     1. [Source](#conf-source)
@@ -13,6 +15,34 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
     1. [Enable TLS Authentication](#uc-tls)
 1. [Contributing](#contributing)
 1. [Copyright](#copyright)
+
+# Features <a name="features"></a>
+
+## Highly Available Failover <a name="feat-failover"></a>
+
+You can use the `hosts` parameter to provide an array of rabbitmq hosts which
+are in your cluster. This allows for highly avaliable configurations where a
+node in your cluster may become inaccessible and this plugin will attempt a reconnection
+on another host in the array.
+
+>>> WARNING: Due to limitations in the library being used for connecting to RabbitMQ
+each node of the cluster much use the same port, vhost and other configuration.
+
+### Example
+
+```
+<source>
+  type amqp
+  hosts ["amqp01.example.com","amqp02.example.com"]
+  port 5672
+  vhost /
+  user guest
+  pass guest
+  queue logs
+  format json
+</source>
+```
+
 
 
 # Configuration <a name="configuration"></a>
@@ -44,7 +74,8 @@ plugins, and can be used as required.
 
 |param|type|default|description|
 |----|----|----|---|
-|:host|:string|nil| *Required* Hostname of RabbitMQ server |
+|:host|:string|nil| *Required (if hosts unset)* Hostname of RabbitMQ server |
+|:hosts|:array|nil| *Required (if host unset)* An array of hostnames of RabbitMQ server in a common cluster (takes precidence over `host`)|
 |:user|:string|"guest"| Username to connect |
 |:pass|:string|"guest"| Password to authenticate with (Secret) |
 |:vhost|:string|"/"| RabbitMQ Virtual Host|
