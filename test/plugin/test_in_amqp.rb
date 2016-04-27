@@ -46,6 +46,20 @@ class AMPQInputTest < Test::Unit::TestCase
       }
     end
 
+    test 'array of hosts' do
+      conf = CONFIG + %[
+        type amqp
+        format json
+        hosts ["bob","fred"]
+        ]
+
+      d = create_driver(conf)
+      assert_equal ["bob", "fred"], d.instance.hosts
+      assert_equal 5672, d.instance.port
+      assert_equal "guest", d.instance.user
+      assert_equal "/", d.instance.vhost
+    end
+
     test 'invalid tls configuration' do
       assert_raise_message(/'tls_key' and 'tls_cert' must be all specified if tls is enabled./) do
         create_driver(CONFIG + %[tls true])
@@ -53,7 +67,7 @@ class AMPQInputTest < Test::Unit::TestCase
     end
 
     test 'invalid host / queue configuration' do
-      assert_raise_message(/'host' and 'queue' must be all specified./) do
+      assert_raise_message(/'host\(s\)' and 'queue' must be all specified./) do
         create_driver(%[
           type amqp
           format json

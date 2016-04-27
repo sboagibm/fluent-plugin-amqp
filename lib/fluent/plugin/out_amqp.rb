@@ -9,6 +9,7 @@ module Fluent
     attr_accessor :connection
 
     config_param :host, :string, :default => nil
+    config_param :hosts, :array, :default => nil
     config_param :user, :string, :default => "guest"
     config_param :pass, :string, :default => "guest", :secret => true
     config_param :vhost, :string, :default => "/"
@@ -40,8 +41,8 @@ module Fluent
     def configure(conf)
       super
       @conf = conf
-      unless @host
-        raise ConfigError, "'host' must be specified."
+      unless @host || @hosts
+        raise ConfigError, "'host' or 'hosts' must be specified."
       end
       unless @key || @tag_key
         raise ConfigError, "Either 'key' or 'tag_key' must be set."
@@ -111,8 +112,9 @@ module Fluent
     end
 
     def get_connection_options()
+      hosts = @hosts ||= Array.new(@host)
       opts = {
-        :host => @host, :port => @port, :vhost => @vhost,
+        :hosts => hosts, :port => @port, :vhost => @vhost,
         :pass => @pass, :user => @user, :ssl => @ssl,
         :verify_ssl => @verify_ssl, :heartbeat => @heartbeat,
         :tls                 => @tls,

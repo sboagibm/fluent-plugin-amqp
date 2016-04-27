@@ -19,6 +19,7 @@ module Fluent
     config_param :tag, :string, :default => "hunter.amqp"
 
     config_param :host, :string, :default => nil
+    config_param :hosts, :array, :default => nil
     config_param :user, :string, :default => "guest"
     config_param :pass, :string, :default => "guest", :secret => true
     config_param :vhost, :string, :default => "/"
@@ -63,8 +64,8 @@ module Fluent
       end
 
       @conf = conf
-      unless @host && @queue
-        raise ConfigError, "'host' and 'queue' must be all specified."
+      unless (@host || @hosts) && @queue
+        raise ConfigError, "'host(s)' and 'queue' must be all specified."
       end
       check_tls_configuration
     end
@@ -140,8 +141,9 @@ module Fluent
     end
 
     def get_connection_options()
+      hosts = @hosts ||= Array.new(@host)
       opts = {
-        :host => @host, :port => @port, :vhost => @vhost,
+        :hosts => hosts, :port => @port, :vhost => @vhost,
         :pass => @pass, :user => @user, :ssl => @ssl,
         :verify_ssl => @verify_ssl, :heartbeat => @heartbeat,
         :tls                 => @tls,
