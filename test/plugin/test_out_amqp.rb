@@ -3,6 +3,15 @@ require_relative '../helper'
 require 'fluent/test'
 require 'fluent/plugin/out_amqp'
 
+# Protection against optional dependency - Ruby 1.9 can't
+# include bunny-mock as its not supported
+begin
+  require 'bunny-mock'
+rescue LoadError
+  # Bunny-Mock requires Ruby 2+ and we're probably running on
+  # 1.9 - so the require explodes
+end
+
 class AMPQOutputTest < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
@@ -73,9 +82,13 @@ class AMPQOutputTest < Test::Unit::TestCase
       end
     end
   end
+
   sub_test_case 'connection handling' do
 
     test 'Exchange is created and bound to' do
+      omit("BunnyMock is not avaliable") unless Object.const_get(BunnyMock).is_a?(Class) rescue false
+
+
       plugin = create_driver(CONFIG).instance
       plugin.connection = BunnyMock.new
 

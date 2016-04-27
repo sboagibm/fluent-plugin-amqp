@@ -26,12 +26,20 @@ Gem::Specification.new do |s|
   s.summary = "AMQP input/output plugin or fluentd"
 
   s.add_runtime_dependency(%q<fluentd>, ["~> 0.12.0"])
-  s.add_runtime_dependency(%q<bunny>, ["~> 2.2"])
+
+  if RUBY_VERSION < "2"
+    s.add_runtime_dependency(%q<amq-protocol>, ["< 2"])
+    s.add_runtime_dependency(%q<bunny>, ["< 2"])
+  else
+    s.add_runtime_dependency(%q<bunny>, [">= 1.7", "< 3"])
+    # We can use this for simple mocking, but only works on Ruby 2+
+    s.add_development_dependency(%q<bunny-mock>, [">= 1.0"])
+  end
+
   s.add_development_dependency(%q<shoulda>)
   s.add_development_dependency(%q<rake>)
   s.add_development_dependency(%q<minitest>, ["< 5.0.0"])
   s.add_development_dependency(%q<test-unit>, [">= 3.1.0"])
-  s.add_development_dependency(%q<bunny-mock>, [">= 1.0"])
   s.add_development_dependency(%q<simplecov>, [">= 0.10"])
 
 end
