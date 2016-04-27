@@ -86,7 +86,8 @@ class AMPQOutputTest < Test::Unit::TestCase
   sub_test_case 'connection handling' do
 
     test 'Exchange is created and bound to' do
-      omit("BunnyMock is not avaliable") unless Object.const_get(BunnyMock).is_a?(Class) rescue false
+      omit("BunnyMock is not avaliable") unless Object.const_defined?("BunnyMock")
+
 
 
       plugin = create_driver(CONFIG).instance
