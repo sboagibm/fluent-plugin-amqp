@@ -141,7 +141,7 @@ module Fluent
     end
 
     def get_connection_options()
-      hosts = @hosts ||= Array.new(@host)
+      hosts = @hosts ||= Array.new(1, @host)
       opts = {
         :hosts => hosts, :port => @port, :vhost => @vhost,
         :pass => @pass, :user => @user, :ssl => @ssl,
