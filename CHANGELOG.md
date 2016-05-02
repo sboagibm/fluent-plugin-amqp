@@ -1,3 +1,13 @@
+# 0.8.x
+
+## 0.8.1
+
+* Fix bug: TypeError with single RabbitMQ. #21
+
+## 0.8.0
+
+* Add automatic failover support for multiple hosts on same cluster. #19
+
 # 0.7.x
 
 ## 0.7.1
