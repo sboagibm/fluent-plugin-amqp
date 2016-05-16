@@ -1,5 +1,9 @@
 # 0.8.x
 
+## 0.8.2
+
+* Miscs: *no effect* Remove fixed date from gemspec #22
+
 ## 0.8.1
 
 * Fix bug: TypeError with single RabbitMQ. #21
