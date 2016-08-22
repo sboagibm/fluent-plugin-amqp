@@ -1,3 +1,9 @@
+# 0.9.x
+
+## 0.9.0
+
+* Add support for Fluent 0.14.x
+
 # 0.8.x
 
 ## 0.8.2

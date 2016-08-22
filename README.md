@@ -25,7 +25,7 @@ are in your cluster. This allows for highly avaliable configurations where a
 node in your cluster may become inaccessible and this plugin will attempt a reconnection
 on another host in the array.
 
->>> WARNING: Due to limitations in the library being used for connecting to RabbitMQ
+> *WARNING:* Due to limitations in the library being used for connecting to RabbitMQ
 each node of the cluster much use the same port, vhost and other configuration.
 
 ### Example
@@ -181,9 +181,6 @@ which is then consumed by one or more input agents.
 
 The example configuration below shows how to setup a direct exchange, with
 multiple consumers each receiving events.
-
-> Note: A manual step is required to bind the exchange to queues reading
-> events - This will be resolved by [#16](https://github.com/giraffi/fluent-plugin-amqp/issues/16)
 
 ### Matcher - Writes to Exchange
 

@@ -1,4 +1,6 @@
 require 'time'
+require 'fluent/input'
+require 'fluent/parser'
 
 module Fluent
   ##
