@@ -2,7 +2,7 @@
 
 This plugin provides both a Source and Matcher which uses RabbitMQ as its transport.
 
-https://travis-ci.org/giraffi/fluent-plugin-amqp.svg
+[![Build Status](https://travis-ci.org/giraffi/fluent-plugin-amqp.svg?branch=master)](https://travis-ci.org/giraffi/fluent-plugin-amqp)
 
 # Table of contents
 
