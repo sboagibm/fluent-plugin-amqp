@@ -1,4 +1,7 @@
 require 'json'
+require 'fluent/output'
+
+
 module Fluent
   ##
   # AMQPOutput to be used as a Fluent MATCHER, sending messages to a RabbitMQ

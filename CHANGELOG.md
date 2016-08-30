@@ -1,3 +1,11 @@
+# 0.9.x
+
+## 0.9.0
+
+* Added support for Fluent 0.14.x
+    * travis-ci build validates plugin against fluent 0.10, 0.12 and 0.14
+* Compatibility: Use old json library when building for Ruby 1.9 and Fluent <= 0.12
+
 # 0.8.x
 
 ## 0.8.2

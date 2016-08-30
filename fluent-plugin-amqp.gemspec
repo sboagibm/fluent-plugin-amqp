@@ -24,11 +24,12 @@ Gem::Specification.new do |s|
   s.rubygems_version = "1.8.25"
   s.summary = "AMQP input/output plugin or fluentd"
 
-  s.add_runtime_dependency(%q<fluentd>, ["~> 0.12.0"])
+  s.add_runtime_dependency(%q<fluentd>)
 
   if RUBY_VERSION < "2"
     s.add_runtime_dependency(%q<amq-protocol>, ["< 2"])
     s.add_runtime_dependency(%q<bunny>, ["< 2"])
+    s.add_runtime_dependency(%q<json>, ["< 2"])
   else
     s.add_runtime_dependency(%q<bunny>, [">= 1.7", "< 3"])
     # We can use this for simple mocking, but only works on Ruby 2+
