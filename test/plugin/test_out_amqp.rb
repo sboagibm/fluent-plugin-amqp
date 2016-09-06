@@ -13,10 +13,25 @@ rescue LoadError
 end
 
 class AMPQOutputTest < Test::Unit::TestCase
+
+  attr_reader :driver
+
   def setup
     Fluent::Test.setup
   end
 
+def get_plugin
+  omit("BunnyMock is not avaliable") unless Object.const_defined?("BunnyMock")
+
+  @driver = create_driver(CONFIG)
+  plugin = @driver.instance
+  plugin.connection = BunnyMock.new
+
+  # Start the driver and wait while it initialises the threads etc
+  plugin.start
+  10.times { sleep 0.05 }
+  return plugin
+end
 
   CONFIG = %[
     type amqp
@@ -27,6 +42,7 @@ class AMPQOutputTest < Test::Unit::TestCase
     user guest
     pass guest
     exchange my_exchange
+    exchange_type fanout
     tag_key true
   ]
 
@@ -38,8 +54,8 @@ class AMPQOutputTest < Test::Unit::TestCase
     tls_verify_peer true
   ]
 
-  def create_driver(conf)
-    Fluent::Test::OutputTestDriver.new(Fluent::AMQPOutput).configure(conf)
+  def create_driver(conf, tag='test')
+    Fluent::Test::BufferedOutputTestDriver.new(Fluent::AMQPOutput,tag).configure(conf)
   end
 
   sub_test_case 'configuration' do
@@ -100,16 +116,8 @@ class AMPQOutputTest < Test::Unit::TestCase
   sub_test_case 'connection handling' do
 
     test 'Exchange is created and bound to' do
-      omit("BunnyMock is not avaliable") unless Object.const_defined?("BunnyMock")
 
-
-
-      plugin = create_driver(CONFIG).instance
-      plugin.connection = BunnyMock.new
-
-      # Start the driver and wait while it initialises the threads etc
-      plugin.start
-      10.times { sleep 0.05 }
+      plugin = get_plugin()
 
       # Should have created the 'logs' queue
       assert_equal true, plugin.connection.exchange_exists?('my_exchange')
@@ -117,6 +125,89 @@ class AMPQOutputTest < Test::Unit::TestCase
         chnl = plugin.somehow_get_channel
         asset_equal true, chnl.bound_to?('my_exchange')
       }
+    end
+
+  end
+
+  sub_test_case 'message_writing' do
+
+
+    test 'A simple object can be written to the broker' do
+# Testing these two bits;
+#      data = JSON.dump( data ) unless data.is_a?( String )
+#      @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+
+      plugin = get_plugin()
+
+      # Should have created the 'logs' queue
+      assert_equal true, plugin.connection.exchange_exists?('my_exchange')
+
+      # bind a testing queue to the exchange
+      queue = plugin.channel.queue 'my.test.queue'
+      queue.bind plugin.exch, routing_key: 'test'
+      # queue.test is now bound to the configured exchange
+
+      # Emit an event through the plugins driver
+      @driver.emit( 'This is a simple string')
+      @driver.run
+
+      # Validate the message was delivered
+      assert_equal 1, queue.message_count
+      assert_equal 'This is a simple string', queue.pop[:message]
+
+    end
+
+    test 'An object can be written to the broker and is converted to json' do
+  # Testing these two bits;
+  #      data = JSON.dump( data ) unless data.is_a?( String )
+  #      @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+
+      plugin = get_plugin()
+
+      # Should have created the 'logs' queue
+      assert_equal true, plugin.connection.exchange_exists?('my_exchange')
+
+      # bind a testing queue to the exchange
+      queue = plugin.channel.queue 'my.test.queue'
+      queue.bind plugin.exch, routing_key: 'test'
+      # queue.test is now bound to the configured exchange
+
+      # Emit an event through the plugins driver
+      object = { message: 'This is an event', nested: { type: 'hash', value: 'banana'} }
+      @driver.emit( object )
+      @driver.run
+
+      # Validate the message was delivered
+      assert_equal 1, queue.message_count
+      assert_equal JSON.dump(object) , queue.pop[:message]
+
+    end
+
+
+    test 'Test UTF8 unicode and emoji strings do not crash the plugin' do
+  # Testing these two bits;
+  #      data = JSON.dump( data ) unless data.is_a?( String )
+  #      @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+
+      plugin = get_plugin()
+
+      # Should have created the 'logs' queue
+      assert_equal true, plugin.connection.exchange_exists?('my_exchange')
+
+      # bind a testing queue to the exchange
+      queue = plugin.channel.queue 'my.test.queue'
+      queue.bind plugin.exch, routing_key: 'test'
+      # queue.test is now bound to the configured exchange
+
+      complex_string_msg = { message: '日 🕵 iPhone\xAE \u{1f60e}' }
+      # Emit an event through the plugins driver
+      @driver.emit( complex_string_msg )
+      @driver.run
+
+      # Validate the message was _not_ delivered
+      assert_equal 1, queue.message_count
+      assert_equal JSON.dump(complex_string_msg) , queue.pop[:message]
+
     end
 
   end

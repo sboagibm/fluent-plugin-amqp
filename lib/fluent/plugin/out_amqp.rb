@@ -11,6 +11,11 @@ module Fluent
 
     attr_accessor :connection
 
+    #Attribute readers to support testing
+    attr_reader :exch
+    attr_reader :channel
+
+
     config_param :host, :string, :default => nil
     config_param :hosts, :array, :default => nil
     config_param :user, :string, :default => "guest"
@@ -83,9 +88,15 @@ module Fluent
 
     def write(chunk)
       chunk.msgpack_each do |(tag, time, data)|
-        data = JSON.dump( data ) unless data.is_a?( String )
-        log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
-        @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+        begin
+           data = JSON.dump( data ) unless data.is_a?( String )
+           log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
+           @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+        rescue JSON::GeneratorError => e
+           log.error "Failure converting data object to json string: #{e.message}"
+           # Debug only - otherwise we may pollute the fluent logs with unparseable events and loop
+           log.debug "JSON.dump failure converting [#{data}]"
+        end
       end
     end
 
