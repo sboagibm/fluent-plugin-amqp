@@ -1,5 +1,9 @@
 # 0.9.x
 
+## 0.9.1
+
+* BugFix: giraffi/fluent-plugin-amqp#25 - Wrapped JSON.dump with simple catch which logs error but does not attempt to fix encoding errors
+
 ## 0.9.0
 
 * Added support for Fluent 0.14.x
