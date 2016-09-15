@@ -1,5 +1,10 @@
 # 0.9.x
 
+## 0.9.2
+
+* Better error handling in AMQP Matcher to deal with byte range errors, and
+any other failure which would prevent buffers from being replayed effectivly.
+
 ## 0.9.1
 
 * BugFix: giraffi/fluent-plugin-amqp#25 - Wrapped JSON.dump with simple catch which logs error but does not attempt to fix encoding errors

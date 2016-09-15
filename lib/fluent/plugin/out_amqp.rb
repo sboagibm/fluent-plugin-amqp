@@ -87,18 +87,32 @@ module Fluent
     end
 
     def write(chunk)
-      chunk.msgpack_each do |(tag, time, data)|
-        begin
-           data = JSON.dump( data ) unless data.is_a?( String )
-           log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
-           @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
-        rescue JSON::GeneratorError => e
-           log.error "Failure converting data object to json string: #{e.message}"
-           # Debug only - otherwise we may pollute the fluent logs with unparseable events and loop
-           log.debug "JSON.dump failure converting [#{data}]"
+      begin
+        chunk.msgpack_each do |(tag, time, data)|
+          begin
+            data = JSON.dump( data ) unless data.is_a?( String )
+            log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
+            @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+          rescue JSON::GeneratorError => e
+            log.error "Failure converting data object to json string: #{e.message}"
+            # Debug only - otherwise we may pollute the fluent logs with unparseable events and loop
+            log.debug "JSON.dump failure converting [#{data}]"
+          rescue StandardError => e
+            # This protects against invalid byteranges and other errors at a per-message level
+            log.error "Unexpected error during message publishing: #{e.message}"
+            log.debug "Failure in publishing message [#{data}]"
+          end
         end
+      rescue MessagePack::MalformedFormatError => e
+        # This has been observed when a server has filled the partition containing
+        # the buffer files, and during replay the chunks were malformed
+        log.error "Malformed msgpack in chunk - Did your server run out of space during buffering? #{e.message}"
+      rescue StandardError => e
+        # Just in case theres any other errors during chunk loading.
+        log.error "Unexpected error during message publishing: #{e.message}"
       end
     end
+
 
     def routing_key( tag )
       if @tag_key
