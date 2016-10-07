@@ -1,5 +1,9 @@
 # 0.9.x
 
+## 0.9.3
+
+* BugFix: `:tls => false` hangs connections for some reason #32 HT: @mrkurt
+
 ## 0.9.2
 
 * Better error handling in AMQP Matcher to deal with byte range errors, and
