@@ -1,13 +1,17 @@
 require 'json'
-require 'fluent/output'
+require 'fluent/plugin/output'
 
 
-module Fluent
+module Fluent::Plugin
   ##
   # AMQPOutput to be used as a Fluent MATCHER, sending messages to a RabbitMQ
   # messaging broker
-  class AMQPOutput < BufferedOutput
-    Plugin.register_output("amqp", self)
+  class AMQPOutput < Output
+    Fluent::Plugin.register_output("amqp", self)
+
+    helpers :compat_parameters
+
+    DEFAULT_BUFFER_TYPE = "memory"
 
     attr_accessor :connection
 
@@ -41,19 +45,24 @@ module Fluent
     config_param :tls_ca_certificates, :array, :default => nil
     config_param :tls_verify_peer, :bool, :default => true
 
+    config_section :buffer do
+      config_set_default :@type, DEFAULT_BUFFER_TYPE
+    end
+
     def initialize
       super
       require "bunny"
     end
 
     def configure(conf)
+      compat_parameters_convert(conf, :buffer)
       super
       @conf = conf
       unless @host || @hosts
-        raise ConfigError, "'host' or 'hosts' must be specified."
+        raise Fluent::ConfigError, "'host' or 'hosts' must be specified."
       end
       unless @key || @tag_key
-        raise ConfigError, "Either 'key' or 'tag_key' must be set."
+        raise Fluent::ConfigError, "Either 'key' or 'tag_key' must be set."
       end
       check_tls_configuration
     end
@@ -80,6 +89,10 @@ module Fluent
     def shutdown
       super
       @connection.stop
+    end
+
+    def formatted_to_msgpack_binary
+      true
     end
 
     def format(tag, time, record)
@@ -134,7 +147,7 @@ module Fluent
     def check_tls_configuration()
       if @tls
         unless @tls_key && @tls_cert
-            raise ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
+            raise Fluent::ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
         end
       end
     end
