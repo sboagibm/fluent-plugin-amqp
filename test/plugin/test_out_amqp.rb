@@ -2,16 +2,10 @@
 
 require_relative '../helper'
 require 'fluent/test'
+require 'fluent/test/driver/output'
 require 'fluent/plugin/out_amqp'
 
-# Protection against optional dependency - Ruby 1.9 can't
-# include bunny-mock as its not supported
-begin
-  require 'bunny-mock'
-rescue LoadError
-  # Bunny-Mock requires Ruby 2+ and we're probably running on
-  # 1.9 - so the require explodes
-end
+require 'bunny-mock'
 
 class AMPQOutputTest < Test::Unit::TestCase
 
@@ -55,8 +49,8 @@ end
     tls_verify_peer true
   ]
 
-  def create_driver(conf, tag='test')
-    Fluent::Test::BufferedOutputTestDriver.new(Fluent::AMQPOutput,tag).configure(conf)
+  def create_driver(conf)
+    Fluent::Test::Driver::Output.new(Fluent::Plugin::AMQPOutput).configure(conf)
   end
 
   sub_test_case 'configuration' do
@@ -148,9 +142,12 @@ end
       queue.bind plugin.exch, routing_key: 'test'
       # queue.test is now bound to the configured exchange
 
+      # v0.14 test driver does not permit to specify String object into #feed args.
+      es = Fluent::OneEventStream.new(Time.now.to_i, 'This is a simple string')
       # Emit an event through the plugins driver
-      @driver.emit( 'This is a simple string')
-      @driver.run
+      @driver.run(default_tag: 'test') do
+        @driver.feed(es)
+      end
 
       # Validate the message was delivered
       assert_equal 1, queue.message_count
@@ -175,8 +172,9 @@ end
 
       # Emit an event through the plugins driver
       object = { message: 'This is an event', nested: { type: 'hash', value: 'banana'} }
-      @driver.emit( object )
-      @driver.run
+      @driver.run(default_tag: 'test') do
+        @driver.feed( object )
+      end
 
       # Validate the message was delivered
       assert_equal 1, queue.message_count
@@ -202,8 +200,9 @@ end
 
       complex_string_msg = { message: '日 🕵 iPhone\xAE \u{1f60e}' }
       # Emit an event through the plugins driver
-      @driver.emit( complex_string_msg )
-      @driver.run
+      @driver.run(default_tag: 'test') do
+        @driver.feed( complex_string_msg )
+      end
 
       # Validate the message was _not_ delivered
       assert_equal 1, queue.message_count
