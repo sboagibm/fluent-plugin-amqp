@@ -1,6 +1,7 @@
 
 require_relative '../helper'
 require 'fluent/test'
+require 'fluent/test/driver/input'
 require 'fluent/plugin/in_amqp'
 
 class AMPQInputTest < Test::Unit::TestCase
@@ -29,7 +30,7 @@ class AMPQInputTest < Test::Unit::TestCase
   ]
 
   def create_driver(conf)
-    Fluent::Test::InputTestDriver.new(Fluent::AMQPInput).configure(conf)
+    Fluent::Test::Driver::Input.new(Fluent::Plugin::AMQPInput).configure(conf)
   end
 
   sub_test_case 'configuration' do

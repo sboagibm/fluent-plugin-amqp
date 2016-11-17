@@ -1,17 +1,19 @@
 require 'time'
-require 'fluent/input'
-require 'fluent/parser'
+require 'fluent/plugin/input'
+require 'fluent/plugin/parser'
 
-module Fluent
+module Fluent::Plugin
   ##
   # AMQPInput to be used as a Fluent SOURCE, reading messages from a RabbitMQ
   # message broker
   class AMQPInput < Input
     Fluent::Plugin.register_input('amqp', self)
 
+    helpers :compat_parameters, :parser
+
     # Define `router` method of v0.12 to support v0.10.57 or earlier
     unless method_defined?(:router)
-      define_method("router") { Engine }
+      define_method("router") { Fluent::Engine }
     end
 
     # Bunny connection handle
@@ -57,17 +59,18 @@ module Fluent
 
     def configure(conf)
       conf['format'] ||= conf['payload_format'] # legacy
+      compat_parameters_convert(conf, :parser)
 
       super
 
-      parser = TextParser.new
-      if parser.configure(conf, false)
-        @parser = parser
+      parser_config = conf.elements('parse').first
+      if parser_config
+        @parser = parser_create(conf: parser_config)
       end
 
       @conf = conf
       unless (@host || @hosts) && @queue
-        raise ConfigError, "'host(s)' and 'queue' must be all specified."
+        raise Fluent::ConfigError, "'host(s)' and 'queue' must be all specified."
       end
       check_tls_configuration
     end
@@ -137,7 +140,7 @@ module Fluent
     def check_tls_configuration()
       if @tls
         unless @tls_key && @tls_cert
-            raise ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
+            raise Fluent::ConfigError, "'tls_key' and 'tls_cert' must be all specified if tls is enabled."
         end
       end
     end
@@ -159,4 +162,4 @@ module Fluent
 
   end # class AMQPInput
 
-end # module Fluent
+end # module Fluent::Plugin
