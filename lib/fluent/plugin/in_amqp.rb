@@ -131,9 +131,9 @@ module Fluent::Plugin
 
     def parse_time( meta )
       if @time_header && meta[:headers][@time_header]
-        Time.parse( meta[:headers][@time_header] ).to_i
+        Fluent::EventTime.from_time(Time.parse( meta[:headers][@time_header] ))
       else
-        Time.new.to_i
+        Fluent::Engine.now
       end
     end
 
