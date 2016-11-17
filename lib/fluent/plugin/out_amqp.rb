@@ -86,8 +86,8 @@ module Fluent::Plugin
     end
 
     def shutdown
-      super
       @connection.stop
+      super
     end
 
     def formatted_to_msgpack_binary
