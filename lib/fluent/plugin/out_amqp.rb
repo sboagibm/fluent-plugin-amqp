@@ -20,30 +20,30 @@ module Fluent::Plugin
     attr_reader :channel
 
 
-    config_param :host, :string, :default => nil
-    config_param :hosts, :array, :default => nil
-    config_param :user, :string, :default => "guest"
-    config_param :pass, :string, :default => "guest", :secret => true
-    config_param :vhost, :string, :default => "/"
-    config_param :port, :integer, :default => 5672
-    config_param :ssl, :bool, :default => false
-    config_param :verify_ssl, :bool, :default => false
-    config_param :heartbeat, :integer, :default => 60
-    config_param :exchange, :string, :default => ""
-    config_param :exchange_type, :string, :default => "direct"
-    config_param :passive, :bool, :default => false
-    config_param :durable, :bool, :default => false
-    config_param :auto_delete, :bool, :default => false
-    config_param :key, :string, :default => nil
-    config_param :persistent, :bool, :default => false
-    config_param :tag_key, :bool, :default => false
-    config_param :tag_header, :string, :default => nil
-    config_param :time_header, :string, :default => nil
-    config_param :tls, :bool, :default => false
-    config_param :tls_cert, :string, :default => nil
-    config_param :tls_key, :string, :default => nil
-    config_param :tls_ca_certificates, :array, :default => nil
-    config_param :tls_verify_peer, :bool, :default => true
+    config_param :host, :string, default: nil
+    config_param :hosts, :array, default: nil
+    config_param :user, :string, default: "guest"
+    config_param :pass, :string, default: "guest", secret: true
+    config_param :vhost, :string, default: "/"
+    config_param :port, :integer, default: 5672
+    config_param :ssl, :bool, default: false
+    config_param :verify_ssl, :bool, default: false
+    config_param :heartbeat, :integer, default: 60
+    config_param :exchange, :string, default: ""
+    config_param :exchange_type, :string, default: "direct"
+    config_param :passive, :bool, default: false
+    config_param :durable, :bool, default: false
+    config_param :auto_delete, :bool, default: false
+    config_param :key, :string, default: nil
+    config_param :persistent, :bool, default: false
+    config_param :tag_key, :bool, default: false
+    config_param :tag_header, :string, default: nil
+    config_param :time_header, :string, default: nil
+    config_param :tls, :bool, default: false
+    config_param :tls_cert, :string, default: nil
+    config_param :tls_key, :string, default: nil
+    config_param :tls_ca_certificates, :array, default: nil
+    config_param :tls_verify_peer, :bool, default: true
 
     config_section :buffer do
       config_set_default :@type, DEFAULT_BUFFER_TYPE
@@ -81,9 +81,9 @@ module Fluent::Plugin
 
       log.info "Creating new exchange #{@exchange}"
       @channel = @connection.create_channel
-      @exch = @channel.exchange(@exchange, :type => @exchange_type.intern,
-                              :passive => @passive, :durable => @durable,
-                              :auto_delete => @auto_delete)
+      @exch = @channel.exchange(@exchange, type: @exchange_type.intern,
+                              passive: @passive, durable: @durable,
+                              auto_delete: @auto_delete)
     end
 
     def shutdown
@@ -105,7 +105,7 @@ module Fluent::Plugin
           begin
             data = JSON.dump( data ) unless data.is_a?( String )
             log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
-            @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
+            @exch.publish(data, key: routing_key( tag ), persistent: @persistent, headers: headers( tag, time ))
           rescue JSON::GeneratorError => e
             log.error "Failure converting data object to json string: #{e.message}"
             # Debug only - otherwise we may pollute the fluent logs with unparseable events and loop
@@ -155,13 +155,13 @@ module Fluent::Plugin
     def get_connection_options()
       hosts = @hosts ||= Array.new(1, @host)
       opts = {
-        :hosts => hosts, :port => @port, :vhost => @vhost,
-        :pass => @pass, :user => @user, :ssl => @ssl,
-        :verify_ssl => @verify_ssl, :heartbeat => @heartbeat,
-        :tls                 => @tls || nil,
-        :tls_cert            => @tls_cert,
-        :tls_key             => @tls_key,
-        :verify_peer         => @tls_verify_peer
+        hosts: hosts, port: @port, vhost: @vhost,
+        pass: @pass, user: @user, ssl: @ssl,
+        verify_ssl: @verify_ssl, heartbeat: @heartbeat,
+        tls: @tls || nil,
+        tls_cert: @tls_cert,
+        tls_key: @tls_key,
+        verify_peer: @tls_verify_peer
       }
       opts[:tls_ca_certificates] = @tls_ca_certificates if @tls_ca_certificates
       return opts
