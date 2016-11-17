@@ -26,15 +26,9 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency(%q<fluentd>, [">= 0.14.8", "< 2"])
 
-  if RUBY_VERSION < "2"
-    s.add_runtime_dependency(%q<amq-protocol>, ["< 2"])
-    s.add_runtime_dependency(%q<bunny>, ["< 2"])
-    s.add_runtime_dependency(%q<json>, ["< 2"])
-  else
-    s.add_runtime_dependency(%q<bunny>, [">= 1.7", "< 3"])
-    # We can use this for simple mocking, but only works on Ruby 2+
-    s.add_development_dependency(%q<bunny-mock>, [">= 1.0"])
-  end
+  s.add_runtime_dependency(%q<bunny>, [">= 1.7", "< 3"])
+  # We can use this for simple mocking, but only works on Ruby 2+
+  s.add_development_dependency(%q<bunny-mock>, [">= 1.0"])
 
   s.add_development_dependency(%q<shoulda>, [">= 3.5.0"])
   s.add_development_dependency(%q<rake>)

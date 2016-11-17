@@ -5,14 +5,7 @@ require 'fluent/test'
 require 'fluent/test/driver/output'
 require 'fluent/plugin/out_amqp'
 
-# Protection against optional dependency - Ruby 1.9 can't
-# include bunny-mock as its not supported
-begin
-  require 'bunny-mock'
-rescue LoadError
-  # Bunny-Mock requires Ruby 2+ and we're probably running on
-  # 1.9 - so the require explodes
-end
+require 'bunny-mock'
 
 class AMPQOutputTest < Test::Unit::TestCase
 
