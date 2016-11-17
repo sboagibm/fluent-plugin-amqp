@@ -45,13 +45,6 @@ module Fluent::Plugin
     config_param :exchange, :string, default: ""
     config_param :routing_key, :string, default: "#"                       # The routing key used to bind queue to exchange - # = matches all, * matches section (tag.*.info)
 
-
-
-    def initialize
-      super
-    end
-
-
     def configure(conf)
       conf['format'] ||= conf['payload_format'] # legacy
       compat_parameters_convert(conf, :parser)
