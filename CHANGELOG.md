@@ -1,5 +1,10 @@
 # 0.10.x
 
+
+## 0.10.1 - 2016-11-17
+
+* BugFix: Failed to set ruby_version properly and broke 0.10.0
+
 ## 0.10.0 - 2016-11-17
 
 * *Breaking Change* - fluent-amqp-plugin only compatible with fluent >= 0.14.8 and ruby >= 2.1
