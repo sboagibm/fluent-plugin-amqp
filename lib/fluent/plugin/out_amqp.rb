@@ -1,6 +1,6 @@
 require 'json'
 require 'fluent/plugin/output'
-
+require "bunny"
 
 module Fluent::Plugin
   ##
@@ -51,7 +51,6 @@ module Fluent::Plugin
 
     def initialize
       super
-      require "bunny"
     end
 
     def configure(conf)

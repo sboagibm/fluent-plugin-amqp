@@ -1,6 +1,7 @@
 require 'time'
 require 'fluent/plugin/input'
 require 'fluent/plugin/parser'
+require 'bunny'
 
 module Fluent::Plugin
   ##
@@ -52,7 +53,6 @@ module Fluent::Plugin
 
 
     def initialize
-      require 'bunny'
       super
     end
 
