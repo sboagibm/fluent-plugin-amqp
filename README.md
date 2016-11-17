@@ -5,8 +5,10 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
 [![Build Status](https://travis-ci.org/giraffi/fluent-plugin-amqp.svg?branch=master)](https://travis-ci.org/giraffi/fluent-plugin-amqp)
 [![Gem Version](https://badge.fury.io/rb/fluent-plugin-amqp.svg)](https://badge.fury.io/rb/fluent-plugin-amqp)
 
+
 # Table of contents
 
+1. [Requirements](#requirements)
 1. [Features](#features)
     1. [Highly Available Failover](#feat-failover)
 1. [Configuration](#configuration)
@@ -18,6 +20,16 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
     1. [Enable TLS Authentication](#uc-tls)
 1. [Contributing](#contributing)
 1. [Copyright](#copyright)
+
+# Requirements <a name="requirements"></a>
+
+
+|fluent-amqp-plugin|fluent|ruby|
+|----|----|----|
+|>= 0.10.0 | >= 0.14.8 | >= 2.1 |
+| < 0.10.0 | > 0.10.0, < 2 <sup>*</sup> | >= 1.9  | 
+
+* May not support all future fluentd features
 
 # Features <a name="features"></a>
 
@@ -140,11 +152,6 @@ Note: The following are in addition to the common parameters shown above.
 ```
 
 ## Matcher - output events from RabbitMQ <a name="conf-matcher"></a>
-
-
-
-
-
 
 ### out
 =======
