@@ -12,11 +12,6 @@ module Fluent::Plugin
 
     helpers :compat_parameters, :parser
 
-    # Define `router` method of v0.12 to support v0.10.57 or earlier
-    unless method_defined?(:router)
-      define_method("router") { Fluent::Engine }
-    end
-
     # Bunny connection handle
     #   - Allows mocking for test purposes
     attr_accessor :connection
