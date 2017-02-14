@@ -41,7 +41,7 @@ node in your cluster may become inaccessible and this plugin will attempt a reco
 on another host in the array.
 
 > *WARNING:* Due to limitations in the library being used for connecting to RabbitMQ
-each node of the cluster much use the same port, vhost and other configuration.
+each node of the cluster must use the same port, vhost and other configuration.
 
 ### Example
 
