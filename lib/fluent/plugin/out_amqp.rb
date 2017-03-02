@@ -47,6 +47,10 @@ module Fluent::Plugin
     config_param :content_type, :string, default: "application/octet"
     config_param :content_encoding, :string, default: nil
 
+    config_section :header do
+      config_set_default :@type, DEFAULT_BUFFER_TYPE
+    end
+
     config_section :buffer do
       config_set_default :@type, DEFAULT_BUFFER_TYPE
     end

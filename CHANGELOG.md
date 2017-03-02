@@ -1,5 +1,11 @@
-# 0.10.x
+# 0.11.x
 
+## 0.11.0 - Unreleased
+
+* Added `content_type` and `content_encoding` configuration for
+   the Matcher plugin - #37
+
+# 0.10.x
 
 ## 0.10.1 - 2016-11-17
 
@@ -10,8 +16,6 @@
 * *Breaking Change* - fluent-amqp-plugin only compatible with fluent >= 0.14.8 and ruby >= 2.1
 * Feature: Updated to use new FluentD 0.14 plugin format
 * Feature: Support for nanosecond precision
-
-
 
 # 0.9.x
 
