@@ -27,7 +27,7 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
 |fluent-amqp-plugin|fluent|ruby|
 |----|----|----|
 |>= 0.10.0 | >= 0.14.8 | >= 2.1 |
-| < 0.10.0 | > 0.10.0, < 2 <sup>*</sup> | >= 1.9  | 
+| < 0.10.0 | > 0.10.0, < 2 <sup>*</sup> | >= 1.9  |
 
 * May not support all future fluentd features
 
@@ -163,6 +163,8 @@ Note: The following are in addition to the common parameters shown above.
 |:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers )|
 |:persistent|:bool|false| | Are messages kept on the exchange even if RabbitMQ shuts down |
 |:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
+|:content_type|:string|"application/octet"| Content-type header to send with message |
+|:content_encoding|:string|nil| Content-Encoding header to send - eg base64 or rot13 |
 
 ### Example
 
@@ -176,6 +178,7 @@ Note: The following are in addition to the common parameters shown above.
   vhost /
   user guest
   pass guest
+  content_type application/json
 </match>
 ```
 
