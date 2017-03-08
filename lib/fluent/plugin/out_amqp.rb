@@ -55,10 +55,55 @@ module Fluent::Plugin
       config_set_default :@type, DEFAULT_BUFFER_TYPE
     end
 
+
+    class HeaderElement
+      include Fluent::Configurable
+
+      config_param :name, :string
+      config_param :default, :string, default: nil
+      config_param :source, default: nil  do |val|
+             if val.start_with?('[')
+              JSON.load(val)
+             else
+               val.split('.')
+            end
+         end
+
+      # Extract a header and value from the input data
+      # returning nil if value cannot be derived
+      def getValue(data)
+        val  = getNestedValue(data, @source ) if @source
+        val ||= @default if @default
+        val
+      end
+
+      def getNestedValue(data, path)
+        temp_data = data
+        temp_path = path.dup
+        until temp_data.nil? or temp_path.empty?
+          temp_data = temp_data[temp_path.shift]
+        end
+        temp_data
+      end
+    end
+
     def configure(conf)
       compat_parameters_convert(conf, :buffer)
       super
       @conf = conf
+
+      # Extract the header configuration into a collection
+      @headers = conf.elements.select {|e|
+        e.name == 'header'
+      }.map {|e|
+        he = HeaderElement.new
+        he.configure(e)
+        unless he.source || he.default
+            raise Fluent::ConfigError, "At least 'default' or 'source' must must be defined in a header configuration section."
+        end
+        he
+      }
+
       unless @host || @hosts
         raise Fluent::ConfigError, "'host' or 'hosts' must be specified."
       end
@@ -104,20 +149,27 @@ module Fluent::Plugin
       begin
         chunk.msgpack_each do |(tag, time, data)|
           begin
-            data = JSON.dump( data ) unless data.is_a?( String )
-            log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time)}"
+            msg_headers = headers(tag,time,data)
+
+            begin
+              data = JSON.dump( data ) unless data.is_a?( String )
+            rescue JSON::GeneratorError => e
+              log.warn "Failure converting data object to json string: #{e.message} - sending as raw object"
+              # Debug only - otherwise we may pollute the fluent logs with unparseable events and loop
+              log.debug "JSON.dump failure converting [#{data}]"
+            end
+
+            log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time,data)}"
             @exch.publish(
               data,
               key: routing_key( tag ),
               persistent: @persistent,
-              headers: headers( tag, time ),
+              headers: msg_headers,
               content_type: @content_type,
               content_encoding: @content_encoding)
 
-          rescue JSON::GeneratorError => e
-            log.error "Failure converting data object to json string: #{e.message}"
-            # Debug only - otherwise we may pollute the fluent logs with unparseable events and loop
-            log.debug "JSON.dump failure converting [#{data}]"
+  # :nocov:
+  #  Hard to throw StandardError through test code
           rescue StandardError => e
             # This protects against invalid byteranges and other errors at a per-message level
             log.error "Unexpected error during message publishing: #{e.message}"
@@ -132,6 +184,7 @@ module Fluent::Plugin
         # Just in case theres any other errors during chunk loading.
         log.error "Unexpected error during message publishing: #{e.message}"
       end
+      # :nocov:
     end
 
 
@@ -143,15 +196,25 @@ module Fluent::Plugin
       end
     end
 
-    def headers( tag, time )
-      {}.tap do |h|
-        h[@tag_header] = tag if @tag_header
-        h[@time_header] = Time.at(time).utc.to_s if @time_header
-      end
+    def headers( tag, time, data )
+      h = {}
+
+      log.debug "Processing Headers: #{@headers}"
+      # A little messy this...
+      # Trying to allow for header overrides where a header defined
+      # earlier will be used if a later header is returning nil (ie not found and no default)
+      h = Hash[ @headers
+                  .collect{|v| [v.name, v.getValue(data) ]}
+                  .delete_if{|x| x.last.nil?}
+          ]
+
+      h[@tag_header] = tag if @tag_header
+      h[@time_header] = Time.at(time).utc.to_s if @time_header
+
+      h
     end
 
 
-    private
     def check_tls_configuration()
       if @tls
         unless @tls_key && @tls_cert
@@ -174,6 +237,5 @@ module Fluent::Plugin
       opts[:tls_ca_certificates] = @tls_ca_certificates if @tls_ca_certificates
       return opts
     end
-
   end
 end

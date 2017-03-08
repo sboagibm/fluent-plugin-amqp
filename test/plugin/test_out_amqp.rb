@@ -65,6 +65,13 @@ end
         assert_equal 5672, d.instance.port
         assert_equal "guest", d.instance.user
         assert_equal "/", d.instance.vhost
+
+        # Check get_connection_options works while we're here
+        opts = d.instance.get_connection_options
+        assert_equal "amqp.example.com",opts[:hosts].first
+        assert_equal 5672, opts[:port]
+        assert_equal "guest", opts[:user]
+        assert_equal "/", opts[:vhost]
       }
     end
 
@@ -104,6 +111,19 @@ end
           type amqp
           format json
           host anywhere.example.com
+          ])
+      end
+    end
+
+    test 'invalid header configuration' do
+      assert_raise_message(/At least 'default' or 'source' must must be defined in a header configuration section/) do
+        create_driver(%[
+          type amqp
+          format json
+          host anywhere.example.com
+          <header>
+            name bob
+          </header>
           ])
       end
     end
@@ -159,9 +179,6 @@ end
     end
 
     test 'An object can be written to the broker and is converted to json' do
-  # Testing these two bits;
-  #      data = JSON.dump( data ) unless data.is_a?( String )
-  #      @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
 
       plugin = get_plugin()
 
@@ -183,6 +200,34 @@ end
       assert_equal 1, queue.message_count
       deliveryProps, msgProps, message = queue.pop
       assert_equal JSON.dump(object) , message
+
+    end
+
+
+    test 'Cases where JSON::GeneratorError is handled sends message as raw data stream' do
+
+      plugin = get_plugin()
+
+      # Should have created the 'logs' queue
+      assert_equal true, plugin.connection.exchange_exists?('my_exchange')
+
+      # bind a testing queue to the exchange
+      queue = plugin.channel.queue 'my.test.queue'
+      queue.bind plugin.exch, routing_key: 'test'
+      # queue.test is now bound to the configured exchange
+
+      # Emit an event through the plugins driver
+      object = { message: "\xAE" }
+      @driver.run(default_tag: 'test') do
+        @driver.feed( object )
+      end
+
+      # Validate the message was delivered
+      assert_equal 1, queue.message_count
+      deliveryProps, msgProps, message = queue.pop
+
+      assert_not_nil message
+      assert_equal "\xAE", message["message"]
 
     end
 
