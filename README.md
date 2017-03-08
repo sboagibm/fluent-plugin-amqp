@@ -16,6 +16,7 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
     1. [Common parameters](#conf-common)
     1. [Source](#conf-source)
     1. [Matcher](#conf-matcher)
+         1. [Message Headers](#conf-matcher-header)
 1. [Example Use Cases](#usecases)
     1. [Using AMQP instead of Fluent TCP forwarders](#uc-forwarder)
     1. [Enable TLS Authentication](#uc-tls)
@@ -154,8 +155,6 @@ Note: The following are in addition to the common parameters shown above.
 
 ## Matcher - output events from RabbitMQ <a name="conf-matcher"></a>
 
-### out
-=======
 ### Matcher specific parameters
 
 |param|type|default|description|
@@ -166,6 +165,53 @@ Note: The following are in addition to the common parameters shown above.
 |:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
 |:content_type|:string|"application/octet"| Content-type header to send with message |
 |:content_encoding|:string|nil| Content-Encoding header to send - eg base64 or rot13 |
+
+#### Headers <a name="conf-matcher-headers"></a>
+
+It is possible to specify message headers based on the content of the incoming
+message, or as a fixed default value as shown below;
+
+```
+<matcher ...>
+...
+
+  <header>
+    name LogLevel
+    source level
+    default "INFO"
+  </header>
+  <header>
+    name SourceHost
+    default my.example.com
+  </header>
+  <header>
+    name CorrelationID
+    source x-request-id
+  </header>
+  <header>
+    name NestedExample
+    source a.nested.value
+  </header>
+  <header>
+    name AnotherNestedExample
+    source ["a", "nested", "value"]
+  </header>
+
+...
+</matcher>
+```
+
+
+The header elements may be set multiple times for multiple additional headers
+to be included on any given message.
+
+* If source is omitted, the header will _always_ be set to the default value
+* If default is omitted the header will only be set if the source is found
+* Overloading headers is permitted
+    * Last defined header with a discovered or default value will be used
+    * Defaults and discovered values are treated equally - If you set a default
+    for a overloaded header the earlier headers *will never be used*
+
 
 ### Example
 
