@@ -6,6 +6,7 @@
    the Matcher plugin - #37
 * Added header options to set message headers based on the message content on
   the Matcher plugin - #35
+* Enabled support for Coveralls code-coverage reporting
 
 # 0.10.x
 

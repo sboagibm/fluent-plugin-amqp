@@ -4,8 +4,7 @@ This plugin provides both a Source and Matcher which uses RabbitMQ as its transp
 
 [![Build Status](https://travis-ci.org/giraffi/fluent-plugin-amqp.svg?branch=master)](https://travis-ci.org/giraffi/fluent-plugin-amqp)
 [![Gem Version](https://badge.fury.io/rb/fluent-plugin-amqp.svg)](https://badge.fury.io/rb/fluent-plugin-amqp)
-[![Code Climate](https://lima.codeclimate.com/github/giraffi/fluent-plugin-amqp/badges/gpa.svg)](https://lima.codeclimate.com/github/giraffi/fluent-plugin-amqp)
-[![Test Coverage](https://lima.codeclimate.com/github/giraffi/fluent-plugin-amqp/badges/coverage.svg)](https://lima.codeclimate.com/github/giraffi/fluent-plugin-amqp/coverage)
+[![Coverage Status](https://coveralls.io/repos/github/giraffi/fluent-plugin-amqp/badge.svg)](https://coveralls.io/github/giraffi/fluent-plugin-amqp)
 
 # Table of contents
 
