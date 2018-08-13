@@ -135,6 +135,7 @@ Note: The following are in addition to the common parameters shown above.
 |:payload_format|:string|"json"| Deprecated - Use `format`|
 |:bind_exchange|:boolean|false| Should the queue automatically bind to the exchange |
 |:exchange|:string|nil| What exchange should the queue bind to? |
+|:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers )|
 |:routing_key|:string|nil| What exchange should the queue bind to? |
 
 ### Example
