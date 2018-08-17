@@ -135,7 +135,7 @@ Note: The following are in addition to the common parameters shown above.
 |:payload_format|:string|"json"| Deprecated - Use `format`|
 |:bind_exchange|:boolean|false| Should the queue automatically bind to the exchange |
 |:exchange|:string|nil| What exchange should the queue bind to? |
-|:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers )|
+|:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers, x-consistent-hash, x-modulus-hash )|
 |:routing_key|:string|nil| What exchange should the queue bind to? |
 
 ### Example
@@ -160,7 +160,7 @@ Note: The following are in addition to the common parameters shown above.
 |param|type|default|description|
 |----|----|----|----|
 |:exchange|:string|""| Name of the exchange to send events to |
-|:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers )|
+|:exchange_type|:string|"direct"| Type of exchange ( direct, fanout, topic, headers, x-consistent-hash, x-modulus-hash )|
 |:persistent|:bool|false| | Are messages kept on the exchange even if RabbitMQ shuts down |
 |:key|:string|nil| Routing key to attach to events (Only applies when `exchange_type topic`) See also `tag_key`|
 |:content_type|:string|"application/octet"| Content-type header to send with message |
@@ -323,7 +323,20 @@ with;
 ```
 while [ true ] ; do echo "{ \"test\": \"$(date)\" }" | nc ${DOCKER_IP} 20001; sleep 1; done
 ```
+## Rabbitmq-sharding
 
+You may find that rabbitmq doesn't behave nicely when delivering lots of events to a single queue as the process thread gets overloaded and starts to send flow control events back to publishers. If you're in this situation, try the rabbitmq-sharding plugin which is in RMQ 3.6+ and can allow queues to be dynamically generated per-node.
+
+To use this;
+
+1. Enable the plugin on all nodes `rabbitmq-plugins enable rabbitmq_sharding`
+1. Create an exchange to accept events and to be sharded using `x-modulus-hash` or `x-consistent-hash`
+1. Configure a sharding policy on the input exchange
+    - `rabbitmqctl set_policy images-shard "^fluent.modhash$" '{"shards-per-node": 2, "routing-key": "1234"}'`
+1. Setup fluentd to use the associated type and bind to a queue named the same as the input exchange name
+    - This queue is created 'dynamically' and will not show as a formal queue in the manager, but will deliver events to fluent normally
+    
+*Warning*: You will need to run at least N consumers for the N shards created as the plugin does not try to route all shards onto consumers dynamically.
 
 # Contributing to fluent-plugin-amqp <a name="contributing"></a>
 
