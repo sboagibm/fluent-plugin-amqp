@@ -29,7 +29,7 @@ def get_plugin(configuration = CONFIG)
   return plugin
 end
 
-  CONFIG = %[
+  CONFIG = %(
     type amqp
     format json
     host amqp.example.com
@@ -40,15 +40,15 @@ end
     exchange my_exchange
     exchange_type fanout
     tag_key true
-  ]
+  ).freeze
 
-  TLS_CONFIG = CONFIG + %[
+  TLS_CONFIG = CONFIG + %q(
     tls true
     tls_key "/etc/fluent/ssl/client.key.pem"
     tls_cert "/etc/fluent/ssl/client.crt.pem"
     tls_ca_certificates ["/etc/fluent/ssl/server.cacrt.pem", "/another/ca/cert.file"]
     tls_verify_peer true
-  ]
+  ).freeze
 
   def create_driver(conf)
     Fluent::Test::Driver::Output.new(Fluent::Plugin::AMQPOutput).configure(conf)
@@ -65,7 +65,7 @@ end
         assert_equal 5672, d.instance.port
         assert_equal "guest", d.instance.user
         assert_equal "/", d.instance.vhost
-
+        assert d.instance.multi_workers_ready?
         # Check get_connection_options works while we're here
         opts = d.instance.get_connection_options
         assert_equal "amqp.example.com",opts[:hosts].first
@@ -76,11 +76,11 @@ end
     end
 
     test 'array of hosts' do
-      conf = CONFIG + %[
+      conf = CONFIG + %q(
         type amqp
         format json
         hosts ["bob","fred"]
-        ]
+        )
 
       d = create_driver(conf)
       assert_equal ["bob", "fred"], d.instance.hosts
@@ -91,40 +91,40 @@ end
 
     test 'invalid tls configuration' do
       assert_raise_message(/'tls_key' and 'tls_cert' must be all specified if tls is enabled./) do
-        create_driver(CONFIG + %[tls true])
+        create_driver(CONFIG + %(tls true))
       end
     end
 
     test 'invalid host configuration' do
       assert_raise_message(/'host' or 'hosts' must be specified./) do
-        create_driver(%[
+        create_driver(%(
           type amqp
           format json
           tag_key true
-          ])
+          ))
       end
     end
 
     test 'invalid tag / tag_key configuration' do
       assert_raise_message(/Either 'key' or 'tag_key' must be set./) do
-        create_driver(%[
+        create_driver(%(
           type amqp
           format json
           host anywhere.example.com
-          ])
+          ))
       end
     end
 
     test 'invalid header configuration' do
       assert_raise_message(/At least 'default' or 'source' must must be defined in a header configuration section/) do
-        create_driver(%[
+        create_driver(%(
           type amqp
           format json
           host anywhere.example.com
           <header>
             name bob
           </header>
-          ])
+          ))
       end
     end
   end
@@ -266,9 +266,9 @@ end
   #      data = JSON.dump( data ) unless data.is_a?( String )
   #      @exch.publish(data, :key => routing_key( tag ), :persistent => @persistent, :headers => headers( tag, time ))
 
-        plugin = get_plugin( CONFIG + %[
+        plugin = get_plugin(CONFIG + %(
           content_type application/json
-          content_encoding base64 ] )
+          content_encoding base64 ))
 
         # Should have created the 'logs' queue
         assert_equal true, plugin.connection.exchange_exists?('my_exchange')
