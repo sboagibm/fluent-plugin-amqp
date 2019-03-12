@@ -127,6 +127,10 @@ module Fluent::Plugin
 
       log.info "Creating new exchange #{@exchange}"
       @channel = @connection.create_channel
+
+      return if @exchange.to_s =~ CHUNK_KEY_PLACEHOLDER_PATTERN
+
+      log.info 'Creating new exchange (in start)', exchange: @exchange
       @exch = @channel.exchange(@exchange, type: @exchange_type.intern,
                               passive: @passive, durable: @durable,
                               auto_delete: @auto_delete)
@@ -151,6 +155,18 @@ module Fluent::Plugin
 
     def write(chunk)
       begin
+        log.debug 'in write, raw exchange value is', exchange: @exchange.to_s
+
+        if @exchange.to_s =~ CHUNK_KEY_PLACEHOLDER_PATTERN
+          exchange_name = extract_placeholders(@exchange, chunk)
+          log.info 'resolved exchange value is', exchange_name: exchange_name
+          @exch = @channel.exchange(exchange_name, type: @exchange_type.intern,
+                                    passive: @passive, durable: @durable,
+                                    auto_delete: @auto_delete)
+        end
+
+        log.debug 'writing data to exchange', chunk_id: dump_unique_id_hex(chunk.unique_id)
+
         chunk.msgpack_each do |(tag, time, data)|
           begin
             msg_headers = headers(tag,time,data)
@@ -163,7 +179,7 @@ module Fluent::Plugin
               log.debug "JSON.dump failure converting [#{data}]"
             end
 
-            log.debug "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time,data)}"
+            log.info "Sending message #{data}, :key => #{routing_key( tag)} :headers => #{headers(tag,time,data)}"
             @exch.publish(
               data,
               key: routing_key( tag ),

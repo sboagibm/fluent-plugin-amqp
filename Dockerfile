@@ -7,7 +7,7 @@ WORKDIR /fluentd
 ADD . /fluentd
 
 RUN gem build fluent-plugin-amqp.gemspec
-RUN gem install -V fluent-plugin-amqp-*.gem
+RUN gem install -V fluent-plugin-amqp-sboagibm-*.gem
 
 COPY /test/fixtures/ /etc/fluentd
 VOLUME /etc/fluentd/

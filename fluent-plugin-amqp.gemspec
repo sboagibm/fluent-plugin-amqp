@@ -4,7 +4,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = "fluent-plugin-amqp"
+  s.name = "fluent-plugin-amqp-sboagibm"
   s.version = File.read("VERSION")
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
     "lib/fluent/plugin/in_amqp.rb",
     "lib/fluent/plugin/out_amqp.rb"
   ]
-  s.homepage = "http://github.com/giraffi/fluent-plugin-amqp"
+  s.homepage = "https://github.com/sboagibm/fluent-plugin-amqp"
   s.licenses = ["Apache License, Version 2.0"]
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.25"
